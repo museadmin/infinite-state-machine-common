@@ -18,144 +18,156 @@ import java.util.Map;
  */
 public class Postgres implements IDataAccessLayer {
 
-    private Map dbData = new HashMap<String, String>();
-    private List<String> comments = new ArrayList<>();
+  private Map dbData = new HashMap<String, String>();
+  private List<String> comments = new ArrayList<>();
 
-    public Postgres(PropertyCache propertyCache, String epochSeconds) {
+  public Postgres(PropertyCache propertyCache, String epochSeconds) {
 
-        dbData.put("dbHost", propertyCache.getProperty("dbHost"));
-        dbData.put("dbName", propertyCache.getProperty("dbName") + epochSeconds);
-        dbData.put("dbPassword", propertyCache.getProperty("dbPassword"));
-        dbData.put("dbPort", propertyCache.getProperty("dbPort"));
-        dbData.put("dbUser", propertyCache.getProperty("dbUser"));
+      dbData.put("dbHost", propertyCache.getProperty("dbHost"));
+      dbData.put("dbName", propertyCache.getProperty("dbName") + epochSeconds);
+      dbData.put("dbPassword", propertyCache.getProperty("dbPassword"));
+      dbData.put("dbPort", propertyCache.getProperty("dbPort"));
+      dbData.put("dbUser", propertyCache.getProperty("dbUser"));
 
-        createDatabase(dbData.get("dbName").toString());
-    }
+      createDatabase(dbData.get("dbName").toString());
+  }
 
-    /**
-     * Create a unique database instance for the run
-     * @param database Name of the DB
-     */
-    public void createDatabase(String database) {
+  /**
+   * Create a unique database instance for the run
+   * @param database Name of the DB
+   */
+  public void createDatabase(String database) {
 
-        try {
-            Connection connection = getConnection("postgres");
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("CREATE DATABASE " + database);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(1);
-        }
-    }
+      try {
+          Connection connection = getConnection("postgres");
+          Statement statement = connection.createStatement();
+          statement.executeUpdate("CREATE DATABASE " + database);
+      } catch (SQLException e) {
+          e.printStackTrace();
+          System.err.println(e.getClass().getName() + ": " + e.getMessage());
+          System.exit(1);
+      }
+  }
 
-    /**
-     * Create a database table using a JSON definition
-     * @param table JSONObject
-     */
-    public void createTable(JSONObject table){
-        executeSqlStatement(createTableStatement(table));
-        comments.forEach(comment -> executeSqlStatement(comment));
-        comments.clear();
-    }
+  /**
+   * Create a database table using a JSON definition
+   * @param table JSONObject
+   */
+  public void createTable(JSONObject table){
+      executeSqlStatement(createTableStatement(table));
+      comments.forEach(comment -> executeSqlStatement(comment));
+      comments.clear();
+  }
 
-    /**
-     * Executes a SQL statement
-     * @param sql The statement to execute
-     * @return True or False for success or failure
-     */
-    public Boolean executeSqlStatement(String sql)  {
-        Boolean rc = false;
-        try {
-            Connection connection = getConnection(getDbData("dbName"));
-            Statement statement = connection.createStatement();
-            rc = statement.execute(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(1);
-        }
-        return rc;
-    }
+  /**
+   * Insert the states read in from an action pack
+   * @param state JSONArray populated with state entries
+   */
+  public void insertState(JSONArray state) {
 
-    /**
-     * Return a connection to the postgres database
-     * @param database Database Name
-     * @return Connection
-     */
-    private Connection getConnection(String database) {
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:postgresql://" +
-                getDbData("dbHost") + ":" + getDbData("dbPort") + "/" + database,
-                getDbData("dbUser"), getDbData("dbPassword"));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(1);
-        }
-        return connection;
-    }
+  }
 
-    /**
-     * Return a member of the dbData hash
-     * @param key Hash ke
-     * @return String Value
-     */
-    private String getDbData(String key) {
-        return dbData.get(key).toString();
-    }
+  public void insertAction(JSONArray action) {
 
-    /**
-     * SQLite3 context aware CREATE TABLE statement builder
-     * @param table JSONObject created from JSON defintion file
-     * @return The SQL as a string
-     */
-    private String createTableStatement(JSONObject table) {
+  }
 
-        StringBuilder sbSql = new StringBuilder(100);
-        sbSql.append("CREATE TABLE ");
-        sbSql.append(table.get("name"));
-        sbSql.append(" (");
+  /**
+   * Executes a SQL statement
+   * @param sql The statement to execute
+   * @return True or False for success or failure
+   */
+  public Boolean executeSqlStatement(String sql)  {
+      Boolean rc = false;
+      try {
+          Connection connection = getConnection(getDbData("dbName"));
+          Statement statement = connection.createStatement();
+          rc = statement.execute(sql);
+      } catch (SQLException e) {
+          e.printStackTrace();
+          System.err.println(e.getClass().getName() + ": " + e.getMessage());
+          System.exit(1);
+      }
+      return rc;
+  }
 
-        JSONArray columns = table.getJSONArray("columns");
+  /**
+   * Return a connection to the postgres database
+   * @param database Database Name
+   * @return Connection
+   */
+  private Connection getConnection(String database) {
+      Connection connection = null;
+      try {
+          connection = DriverManager.getConnection("jdbc:postgresql://" +
+              getDbData("dbHost") + ":" + getDbData("dbPort") + "/" + database,
+              getDbData("dbUser"), getDbData("dbPassword"));
+      } catch (SQLException e) {
+          e.printStackTrace();
+          System.err.println(e.getClass().getName() + ": " + e.getMessage());
+          System.exit(1);
+      }
+      return connection;
+  }
 
-        columns.forEach(column -> {
-            JSONObject col = (JSONObject) column;
+  /**
+   * Return a member of the dbData hash
+   * @param key Hash ke
+   * @return String Value
+   */
+  private String getDbData(String key) {
+      return dbData.get(key).toString();
+  }
 
-            sbSql.append(col.getString("name"));
-            sbSql.append(" " + col.getString("type"));
+  /**
+   * SQLite3 context aware CREATE TABLE statement builder
+   * @param table JSONObject created from JSON defintion file
+   * @return The SQL as a string
+   */
+  private String createTableStatement(JSONObject table) {
 
-            if (col.getBoolean("not_null")) {
-                sbSql.append(" NOT NULL");
-            }
+      StringBuilder sbSql = new StringBuilder(100);
+      sbSql.append("CREATE TABLE ");
+      sbSql.append(table.get("name"));
+      sbSql.append(" (");
 
-            String def = col.getString("default");
-            if (! def.isEmpty()) {
-                sbSql.append(" DEFAULT '" + def + "'");
-            }
+      JSONArray columns = table.getJSONArray("columns");
 
-            if (col.getBoolean("primary_key")) {
-                sbSql.append(" PRIMARY KEY");
-            }
+      columns.forEach(column -> {
+          JSONObject col = (JSONObject) column;
 
-            sbSql.append(", ");
+          sbSql.append(col.getString("name"));
+          sbSql.append(" " + col.getString("type"));
 
-            String comment = col.getString("comment");
-            if (! comment.isEmpty()) { comments.add("COMMENT ON COLUMN " +
-                    table.get("table_name") + "." +
-                    col.getString("name") + " is '" +
-                    comment + "';"
-                );
-            }
-        });
+          if (col.getBoolean("not_null")) {
+              sbSql.append(" NOT NULL");
+          }
 
-        sbSql.append(");");
+          String def = col.getString("default");
+          if (! def.isEmpty()) {
+              sbSql.append(" DEFAULT '" + def + "'");
+          }
 
-        String sql = sbSql.toString();
-        int index = sql.lastIndexOf(',');
-        sbSql.deleteCharAt(index);
+          if (col.getBoolean("primary_key")) {
+              sbSql.append(" PRIMARY KEY");
+          }
 
-        return sbSql.toString();
-    }
+          sbSql.append(", ");
+
+          String comment = col.getString("comment");
+          if (! comment.isEmpty()) { comments.add("COMMENT ON COLUMN " +
+                  table.get("table_name") + "." +
+                  col.getString("name") + " is '" +
+                  comment + "';"
+              );
+          }
+      });
+
+      sbSql.append(");");
+
+      String sql = sbSql.toString();
+      int index = sql.lastIndexOf(',');
+      sbSql.deleteCharAt(index);
+
+      return sbSql.toString();
+  }
 }

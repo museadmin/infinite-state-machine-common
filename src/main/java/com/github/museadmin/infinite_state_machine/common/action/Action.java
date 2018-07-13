@@ -39,10 +39,6 @@ public class Action {
 
   }
 
-  private void importStates() {
-
-  }
-
   /**
    * Return the payload for this action read from the database.
    */
