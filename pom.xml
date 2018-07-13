@@ -6,7 +6,7 @@
 
     <groupId>com.github.museadmin</groupId>
     <artifactId>infinite-state-machine-common</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${infinite.state.machine.common}</version>
 
     <!--The identifier of the parent POM-->
     <parent>
