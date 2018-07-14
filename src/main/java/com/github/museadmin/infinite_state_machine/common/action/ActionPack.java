@@ -2,17 +2,26 @@ package com.github.museadmin.infinite_state_machine.common.action;
 
 import com.github.museadmin.infinite_state_machine.core.InfiniteStateMachine;
 import org.json.JSONObject;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.*;
 
 public class ActionPack implements IActionPack {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(InfiniteStateMachine.class.getName());
 
   /**
-   * Read in a JSON file and return it as a JSONObject
+   * Read in a JSON file and return it as a JSONObject. This method resides
+   * here to ensure that the resource file read in is from the inheriting
+   * action pack, not the state machine resource directory.
    * @param fileName The unqualified file name for the resource
    * @return
    */
@@ -37,4 +46,36 @@ public class ActionPack implements IActionPack {
     return new JSONObject(sb.toString());
   }
 
+
+  /**
+   * Use introspection to read in all of the classes in a given action pack
+   * Filter out the ones that are actions and return them in an array
+   */
+  public ArrayList getActionsFromActionPack() {
+    String packageName = this.getClass().getPackage().getName();
+
+    List<ClassLoader> classLoadersList = new LinkedList<>();
+    classLoadersList.add(ClasspathHelper.contextClassLoader());
+    classLoadersList.add(ClasspathHelper.staticClassLoader());
+
+    Reflections reflections = new Reflections(new ConfigurationBuilder()
+        .setScanners(new SubTypesScanner(false /* don't exclude Object.class */), new ResourcesScanner())
+        .setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
+        .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(packageName))));
+
+    Set<Class<? extends Action>> classes = reflections.getSubTypesOf(Action.class);
+    ArrayList<Action> actions = new ArrayList<>();
+
+    for (Class a : classes) {
+      try {
+        Action action = (Action) Class.forName(a.getName()).newInstance();
+        actions.add(action);
+      } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        System.exit(1);
+      }
+    }
+    return actions;
+  }
 }

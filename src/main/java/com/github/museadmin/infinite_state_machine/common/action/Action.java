@@ -28,7 +28,8 @@ public class Action {
    * Test if action is active.
    * @return True if action is active.
    */
-  private Boolean active() {
+  private Boolean actionIsNotActive() {
+    // Should have active = true, phase = current phase or ALL
     return true;
   }
 
