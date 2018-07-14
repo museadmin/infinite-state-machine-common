@@ -23,7 +23,7 @@ public class ActionPack implements IActionPack {
    * here to ensure that the resource file read in is from the inheriting
    * action pack, not the state machine resource directory.
    * @param fileName The unqualified file name for the resource
-   * @return
+   * @return JSONObject containing the data
    */
   public JSONObject getJsonObjectFromResourceFile(String fileName) {
     InputStream is = ClassLoader.getSystemResourceAsStream(fileName);
@@ -70,7 +70,15 @@ public class ActionPack implements IActionPack {
       try {
         Action action = (Action) Class.forName(a.getName()).newInstance();
         actions.add(action);
-      } catch (Exception e) {
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        System.exit(1);
+      } catch (IllegalAccessException e) {
+        e.printStackTrace();
+        System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        System.exit(1);
+      } catch (InstantiationException e) {
         e.printStackTrace();
         System.err.println(e.getClass().getName() + ": " + e.getMessage());
         System.exit(1);
