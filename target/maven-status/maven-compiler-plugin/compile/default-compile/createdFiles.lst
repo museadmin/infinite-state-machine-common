@@ -1,7 +1,0 @@
-com/github/museadmin/infinite_state_machine/common/action/Action.class
-com/github/museadmin/infinite_state_machine/common/action/IActionPack.class
-com/github/museadmin/infinite_state_machine/common/dal/Sqlite3.class
-com/github/museadmin/infinite_state_machine/common/action/IAction.class
-com/github/museadmin/infinite_state_machine/common/dal/Postgres.class
-com/github/museadmin/infinite_state_machine/common/dal/IDataAccessLayer.class
-com/github/museadmin/infinite_state_machine/common/action/ActionPack.class

@@ -67,6 +67,10 @@ public class Postgres implements IDataAccessLayer {
 
   }
 
+  /**
+   * Insert the actions read in from an action pack into the state_machine table
+   * @param action JSONArray populated with action entries
+   */
   public void insertAction(JSONArray action) {
 
   }
