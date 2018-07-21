@@ -41,22 +41,6 @@ public class Sqlite3 implements IDataAccessLayer {
   }
 
   /**
-   * Insert the states read in from an action pack into the state table
-   * @param state JSONArray populated with state entries
-   */
-  public void insertState(JSONArray state) {
-    executeSqlStatement(createStateStatement(state));
-  }
-
-  /**
-   * Insert the actions read in from an action pack into the state_machine table
-   * @param action JSONArray populated with action entries
-   */
-  public void insertAction(JSONArray action) {
-    executeSqlStatement(createActionStatement(action));
-  }
-
-  /**
    * Executes a SQL statement
    * @param sql The statement to execute
    * @return True or False for success or failure
@@ -90,41 +74,6 @@ public class Sqlite3 implements IDataAccessLayer {
           System.exit(1);
       }
       return connection;
-  }
-
-  private String createActionStatement(JSONArray action) {
-    StringBuilder sbSql = new StringBuilder(200);
-    sbSql.append("INSERT INTO state_machine ");
-    sbSql.append("(action, phase, payload, activate) ");
-    sbSql.append("values (");
-    action.forEach(value -> sbSql.append("'" + value +"',"));
-    sbSql.append(");");
-
-    String sql = sbSql.toString();
-    int index = sql.lastIndexOf(',');
-    sbSql.deleteCharAt(index);
-
-    return sbSql.toString();
-  }
-
-  /**
-   * Create the insert statement for a state
-   * @param state JSONArray contains the fields
-   * @return String Insert statement
-   */
-  private String createStateStatement(JSONArray state) {
-    StringBuilder sbSql = new StringBuilder(200);
-    sbSql.append("INSERT INTO state ");
-    sbSql.append("(status, state_flag, note) ");
-    sbSql.append("values (");
-    state.forEach(value -> sbSql.append("'" + value +"',"));
-    sbSql.append(");");
-
-    String sql = sbSql.toString();
-    int index = sql.lastIndexOf(',');
-    sbSql.deleteCharAt(index);
-
-    return sbSql.toString();
   }
 
   /**

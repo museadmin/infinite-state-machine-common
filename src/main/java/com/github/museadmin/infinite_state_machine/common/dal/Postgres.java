@@ -60,22 +60,6 @@ public class Postgres implements IDataAccessLayer {
   }
 
   /**
-   * Insert the states read in from an action pack
-   * @param state JSONArray populated with state entries
-   */
-  public void insertState(JSONArray state) {
-
-  }
-
-  /**
-   * Insert the actions read in from an action pack into the state_machine table
-   * @param action JSONArray populated with action entries
-   */
-  public void insertAction(JSONArray action) {
-
-  }
-
-  /**
    * Executes a SQL statement
    * @param sql The statement to execute
    * @return True or False for success or failure

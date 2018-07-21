@@ -9,8 +9,5 @@
         <module name="infinite-state-machine-common" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="infinite-state-machine-common" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
