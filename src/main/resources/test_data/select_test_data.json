@@ -1,0 +1,70 @@
+{
+  "items" : [
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "select"
+      },
+      "columns" : [
+        "status",
+        "state_flag",
+        "note"
+      ]
+    },
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "select"
+      },
+      "columns" : [
+        "status",
+        "state_flag",
+        "note"
+      ],
+      "where" : {
+        "predicates" : [
+          {
+            "operator" : "=",
+            "left" : "status",
+            "right" : "false"
+          }
+        ]
+      }
+    },
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "select"
+      },
+      "columns" : [
+        "status",
+        "state_flag",
+        "note"
+      ],
+      "where" : {
+        "predicates" : [
+          {
+            "operator" : "=",
+            "left" : "status",
+            "right" : "false"
+          },
+          {
+            "logical_operator" : "AND",
+            "operator" : "=",
+            "left" : "state_flag",
+            "right" : "READY_TO_RUN"
+          }
+        ]
+      }
+    },
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "select"
+      },
+      "columns" : [
+        "*"
+      ]
+    }
+  ]
+}

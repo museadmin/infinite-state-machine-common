@@ -10,6 +10,9 @@ import java.util.ArrayList;
  */
 public class JsonToSqlEtl {
 
+  // TODO This will need to have an interface and a different version for each RDBMS
+  // or might be better to just move JsonToSqlEtl.parseSqlFromFile into each dao
+
   /**
    * Return an array list of SQL statements as parsed from an Action
    * pack's pack_data.json file that has been read into a JSONObject
@@ -17,7 +20,7 @@ public class JsonToSqlEtl {
    * @param jsonObject The raw data  in json form
    * @return ArrayList of SQL statements
    */
-  public static ArrayList <String> parseSqlFromFile(JSONObject jsonObject) {
+  public static ArrayList <String> parseSqlFromJson(JSONObject jsonObject) {
 
     ArrayList <String> statements  = new ArrayList<>();
     JSONArray items = jsonObject.getJSONArray("items");
@@ -27,7 +30,7 @@ public class JsonToSqlEtl {
       if (crud.equals("insert")) {
         statements.addAll(parseInsertStatements(items.getJSONObject(i)));
       } else if (crud.equals("select")) {
-        statements = null;
+        statements.add(parseSelectStatement(items.getJSONObject(i)));
       } else if (crud.equals("update")) {
         statements = null;
       } else if (crud.equals("delete")) {
@@ -36,6 +39,58 @@ public class JsonToSqlEtl {
     }
 
     return statements;
+  }
+
+  private static String parseSelectStatement(JSONObject jsonObject) {
+
+    String tableName = jsonObject.getJSONObject("meta").get("table").toString();
+
+    // Build the start of the select statement
+    StringBuilder start = new StringBuilder();
+    start.append("SELECT ");
+
+    // Add the columns being selected
+    JSONArray columns = jsonObject.getJSONArray("columns");
+    for (int i = 0; i < columns.length(); i++) {
+      start.append(columns.get(i) + ", ");
+    }
+    start = removeTrailingComma(start);
+
+    // From
+    start.append("FROM " + tableName + " ");
+    String beginning = start.toString();
+
+    // Do we have a where clause?
+    StringBuilder whereClause = new StringBuilder();
+
+    JSONObject where;
+    if (jsonObject.has("where")) {
+      whereClause.append("WHERE");
+      where = jsonObject.getJSONObject("where");
+
+      JSONArray predicates;
+      if (where.has("predicates")) {
+        predicates = where.getJSONArray("predicates");
+        for (int i = 0; i < predicates.length(); i++) {
+          JSONObject predicate = predicates.getJSONObject(i);
+          String logicalOperator = (predicate.has("logical_operator")) ? predicate.getString("logical_operator") : "";
+          String left = predicate.getString("left");
+          String right = predicate.getString("right");
+          String operator = predicate.getString("operator");
+          whereClause.append(
+            logicalOperator + " " +
+            left + " " +
+            operator + " " +
+            "'" + right + "' ");
+        }
+      }
+    } else {
+      beginning = beginning.trim();
+    }
+
+    String end = ";";
+
+    return beginning + whereClause.toString().trim() + end;
   }
 
   /**
@@ -52,7 +107,7 @@ public class JsonToSqlEtl {
     start.append("INSERT INTO " + tableName + " (");
     JSONArray columns = jsonObject.getJSONArray("columns");
     for (int i = 0; i < columns.length(); i++) {
-      start.append("'" + columns.get(i).toString() + "',");
+      start.append("'" + columns.get(i).toString() + "', ");
     }
     start = removeTrailingComma(start);
     start.append(") values (");
@@ -67,7 +122,7 @@ public class JsonToSqlEtl {
       StringBuilder middle = new StringBuilder();
       JSONArray values = valuesArray.getJSONArray(i);
       for (int j = 0; j < values.length(); j++) {
-        middle.append("'" + values.get(j).toString() + "',");
+        middle.append("'" + values.get(j).toString() + "', ");
       }
       middle = removeTrailingComma(middle);
 
