@@ -2,7 +2,6 @@ package com.github.museadmin.infinite_state_machine.common.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 
 /**
@@ -34,11 +33,34 @@ public class JsonToSqlEtl {
       } else if (crud.equals("update")) {
         statements.add(parseUpdateStatement(items.getJSONObject(i)));
       } else if (crud.equals("delete")) {
-        statements = null;
+        statements.add(parseDeleteStatement(items.getJSONObject(i)));
       }
     }
 
     return statements;
+  }
+
+  private static String parseDeleteStatement(JSONObject jsonObject) {
+
+    String tableName = jsonObject.getJSONObject("meta").get("table").toString();
+
+    // Build the start of the select statement
+    StringBuilder start = new StringBuilder();
+    start.append("DELETE FROM " + tableName + " ");
+
+    String beginning = start.toString();
+
+    // Do we have a where clause?
+    String where = "";
+    if (jsonObject.has("where")) {
+      where = constructWhereClause(jsonObject);
+    } else {
+      beginning = beginning.trim();
+    }
+
+    String end = ";";
+
+    return beginning + where.trim() + end;
   }
 
   /** Create SQL UPDATE statement defined in an Action Pack's pack_data JSONObject
@@ -46,7 +68,39 @@ public class JsonToSqlEtl {
    * @return String. The SQL UPDATE Statement
    */
   private static String parseUpdateStatement(JSONObject jsonObject) {
-    return "";
+
+    String tableName = jsonObject.getJSONObject("meta").get("table").toString();
+
+    // Build the start of the select statement
+    StringBuilder start = new StringBuilder();
+    start.append("UPDATE " + tableName + " SET ");
+
+    // Should have same number of values as columns to update
+    JSONArray columns = jsonObject.getJSONArray("columns");
+    JSONArray values = jsonObject.getJSONArray("values");
+    if (columns.length() != values.length()) {
+      throw new SqlFromJsonParsingException(
+        "Unequal number of fields and values for update");
+    }
+
+    // Set the values
+    for (int i = 0; i < columns.length(); i++) {
+      start.append(columns.get(i) + " = '" + values.get(i) + "', ");
+    }
+    start = removeLastComma(start);
+    String beginning = start.toString();
+
+    // Do we have a where clause?
+    String where = "";
+    if (jsonObject.has("where")) {
+      where = constructWhereClause(jsonObject);
+    } else {
+      beginning = beginning.trim();
+    }
+
+    String end = ";";
+
+    return beginning + where.trim() + end;
   }
 
   /**
@@ -62,48 +116,75 @@ public class JsonToSqlEtl {
     StringBuilder start = new StringBuilder();
     start.append("SELECT ");
 
-    // Add the columns being selected
-    JSONArray columns = jsonObject.getJSONArray("columns");
-    for (int i = 0; i < columns.length(); i++) {
-      start.append(columns.get(i) + ", ");
-    }
-    start = removeLastComma(start);
+    // Add the columns
+    start = addColumns(jsonObject, start);
 
     // From
     start.append("FROM " + tableName + " ");
     String beginning = start.toString();
 
     // Do we have a where clause?
-    StringBuilder whereClause = new StringBuilder();
-
-    JSONObject where;
+    String where = "";
     if (jsonObject.has("where")) {
-      whereClause.append("WHERE");
-      where = jsonObject.getJSONObject("where");
-
-      JSONArray predicates;
-      if (where.has("predicates")) {
-        predicates = where.getJSONArray("predicates");
-        for (int i = 0; i < predicates.length(); i++) {
-          JSONObject predicate = predicates.getJSONObject(i);
-          String logicalOperator = (predicate.has("logical_operator")) ? predicate.getString("logical_operator") : "";
-          String left = predicate.getString("left");
-          String right = predicate.getString("right");
-          String operator = predicate.getString("operator");
-          whereClause.append(
-            logicalOperator + " " +
-            left + " " +
-            operator + " " +
-            "'" + right + "' ");
-        }
-      }
+      where = constructWhereClause(jsonObject);
     } else {
       beginning = beginning.trim();
     }
 
     String end = ";";
 
-    return beginning + whereClause.toString().trim() + end;
+    return beginning + where.trim() + end;
+  }
+
+  /**
+   * Add the columns to a SQL statement
+   * @param jsonObject JSONObject containing the column names
+   * @param start StringBuilder. The beginning of the SQL statement
+   * @return StringBuilder. The beginning plus the columns
+   */
+  private static StringBuilder addColumns(JSONObject jsonObject,
+                                          StringBuilder start) {
+    // Add the columns being selected
+    JSONArray columns = jsonObject.getJSONArray("columns");
+    for (int i = 0; i < columns.length(); i++) {
+      start.append(columns.get(i) + ", ");
+    }
+    return removeLastComma(start);
+  }
+
+  /**
+   * Construct a where clause form a where element in the JSON and return
+   * it as a string to the calling builder method.
+   * @param jsonObject The object containing the where definition
+   * @return String. The constructed where clause
+   */
+  private static String constructWhereClause(JSONObject jsonObject) {
+
+    StringBuilder whereClause = new StringBuilder();
+    JSONObject where;
+
+    whereClause.append("WHERE");
+    where = jsonObject.getJSONObject("where");
+
+    JSONArray predicates;
+    if (where.has("predicates")) {
+      predicates = where.getJSONArray("predicates");
+      for (int i = 0; i < predicates.length(); i++) {
+        JSONObject predicate = predicates.getJSONObject(i);
+        String logicalOperator = (predicate.has("logical_operator")) ?
+          predicate.getString("logical_operator") : "";
+        String left = predicate.getString("left");
+        String right = predicate.getString("right");
+        String operator = predicate.getString("operator");
+        whereClause.append(
+          logicalOperator + " " +
+            left + " " +
+            operator + " " +
+            "'" + right + "' ");
+      }
+    }
+
+    return whereClause.toString();
   }
 
   /**
@@ -153,10 +234,5 @@ public class JsonToSqlEtl {
    */
   private static StringBuilder removeLastComma(StringBuilder target) {
     return target.deleteCharAt(target.toString().lastIndexOf(','));
-  }
-
-  private static String constructWhereClause(JSONObject jsonObject) {
-
-    return "";
   }
 }

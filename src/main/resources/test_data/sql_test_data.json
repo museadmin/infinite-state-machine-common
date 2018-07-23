@@ -69,25 +69,6 @@
     {
       "meta" : {
         "table" : "states",
-        "crud" : "insert"
-      },
-      "columns" : [
-        "status",
-        "state_flag",
-        "note"
-      ],
-      "values" : [
-        ["false", "READY_TO_RUN", "We are ready to run"],
-        ["false", "EMERGENCY_SHUTDOWN", "Run phase is emergency shutdown"],
-        ["false", "NORMAL_SHUTDOWN", "Run phase is shutting down normally"],
-        ["false", "RUNNING", "Run phase is running"],
-        ["true", "STARTING", "Run phase is starting"],
-        ["false", "STOPPED", "Run phase is stopped"]
-      ]
-    },
-    {
-      "meta" : {
-        "table" : "states",
         "crud" : "update"
       },
       "columns" : [
@@ -96,8 +77,9 @@
         "note"
       ],
       "values" : [
-        ["true", "TEST_FLAG", "Test Note"]
-      ],
+        "true",
+        "TEST_FLAG",
+        "Test Note"],
       "where" : {
         "predicates" : [
           {
@@ -113,6 +95,62 @@
           }
         ]
       }
+    },
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "delete"
+      },
+      "where" : {
+        "predicates" : [
+          {
+            "operator" : "=",
+            "left" : "status",
+            "right" : "false"
+          }
+        ]
+      }
+    },
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "delete"
+      },
+      "where" : {
+        "predicates" : [
+          {
+            "operator" : "=",
+            "left" : "status",
+            "right" : "false"
+          },
+          {
+            "logical_operator" : "AND",
+            "operator" : "=",
+            "left" : "state_flag",
+            "right" : "READY_TO_RUN"
+          }
+        ]
+      }
+    },
+    {
+      "meta" : {
+        "table" : "states",
+        "crud" : "insert"
+      },
+      "columns" : [
+        "status",
+        "state_flag",
+        "note"
+      ],
+      "values" : [
+        ["false", "READY_TO_RUN", "We are ready to run"],
+        ["false", "EMERGENCY_SHUTDOWN", "Run phase is emergency shutdown"],
+        ["false", "NORMAL_SHUTDOWN", "Run phase is shutting down normally"],
+        ["false", "RUNNING", "Run phase is running"],
+        ["true", "STARTING", "Run phase is starting"],
+        ["false", "STOPPED", "Run phase is stopped"]
+      ]
     }
+
   ]
 }

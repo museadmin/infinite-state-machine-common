@@ -13,10 +13,6 @@ public class TestJsonToSqlEtl {
 
   protected JSONObject jsonObject;
 
-  // Read resource file into JSONObject
-  // Pass to ETL
-  // Verify SQL select statements
-
   @Before
   public void setup() throws Exception {
 
@@ -46,7 +42,7 @@ public class TestJsonToSqlEtl {
   }
 
   @Test
-  public void testEtlReturnsSqlSelectStatementWithWhereClauseAndAnotherclause() {
+  public void testEtlReturnsSqlSelectStatementWithWhereClauseAndAnotherClause() {
     ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
     Assert.assertEquals(
       "SELECT status, state_flag, note FROM states " +
@@ -60,6 +56,33 @@ public class TestJsonToSqlEtl {
     Assert.assertEquals(
       "SELECT * FROM states;",
       statements.get(3));
+  }
+
+  @Test
+  public void testEtlReturnsSqlUpdateStatementWithWhereClauseAndAnotherClause(){
+    ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
+    Assert.assertEquals(
+      "UPDATE states SET status = 'true', " +
+        "state_flag = 'TEST_FLAG', note = 'Test Note' " +
+        "WHERE status = 'false' AND state_flag = 'READY_TO_RUN';",
+      statements.get(4));
+  }
+
+  @Test
+  public void testEtlReturnsSqlDeleteStatementWithWhereClause(){
+    ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
+    Assert.assertEquals(
+      "DELETE FROM states WHERE status = 'false';",
+      statements.get(5));
+  }
+
+  @Test
+  public void testEtlReturnsSqlDeleteStatementWithWhereClauseAndAnotherClause(){
+    ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
+    Assert.assertEquals(
+      "DELETE FROM states WHERE status = 'false'" +
+        " AND state_flag = 'READY_TO_RUN';",
+      statements.get(6));
   }
 
 }
