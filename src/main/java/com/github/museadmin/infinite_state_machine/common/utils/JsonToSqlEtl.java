@@ -32,7 +32,7 @@ public class JsonToSqlEtl {
       } else if (crud.equals("select")) {
         statements.add(parseSelectStatement(items.getJSONObject(i)));
       } else if (crud.equals("update")) {
-        statements = null;
+        statements.add(parseUpdateStatement(items.getJSONObject(i)));
       } else if (crud.equals("delete")) {
         statements = null;
       }
@@ -41,6 +41,19 @@ public class JsonToSqlEtl {
     return statements;
   }
 
+  /** Create SQL UPDATE statement defined in an Action Pack's pack_data JSONObject
+   * @param jsonObject One of the items from an Action Pack's pack_data file
+   * @return String. The SQL UPDATE Statement
+   */
+  private static String parseUpdateStatement(JSONObject jsonObject) {
+    return "";
+  }
+
+  /**
+   * Create SQL SELECT statement defined in an Action Pack's pack_data JSONObject
+   * @param jsonObject One of the items from an Action Pack's pack_data file
+   * @return String. The SQL SELECT Statement
+   */
   private static String parseSelectStatement(JSONObject jsonObject) {
 
     String tableName = jsonObject.getJSONObject("meta").get("table").toString();
@@ -54,7 +67,7 @@ public class JsonToSqlEtl {
     for (int i = 0; i < columns.length(); i++) {
       start.append(columns.get(i) + ", ");
     }
-    start = removeTrailingComma(start);
+    start = removeLastComma(start);
 
     // From
     start.append("FROM " + tableName + " ");
@@ -94,7 +107,7 @@ public class JsonToSqlEtl {
   }
 
   /**
-   * Create SQL INSERT statements defined in an Action Pack's pack_data JSONObject
+   * Create SQL INSERT statement defined in an Action Pack's pack_data JSONObject
    * @param jsonObject One of the items from an Action Pack's pack_data file
    * @return ArrayList<String>The SQL INSERT statements</String>
    */
@@ -109,7 +122,7 @@ public class JsonToSqlEtl {
     for (int i = 0; i < columns.length(); i++) {
       start.append("'" + columns.get(i).toString() + "', ");
     }
-    start = removeTrailingComma(start);
+    start = removeLastComma(start);
     start.append(") values (");
     String beginning = start.toString();
 
@@ -124,7 +137,7 @@ public class JsonToSqlEtl {
       for (int j = 0; j < values.length(); j++) {
         middle.append("'" + values.get(j).toString() + "', ");
       }
-      middle = removeTrailingComma(middle);
+      middle = removeLastComma(middle);
 
       // Push the statement into the statements list
       statements.add(beginning + middle.toString() + end);
@@ -133,7 +146,17 @@ public class JsonToSqlEtl {
     return statements;
   }
 
-  private static StringBuilder removeTrailingComma(StringBuilder target) {
+  /**
+   * Utility method to remove the last comma from a StringBuilder
+   * @param target The StringBuilder to modify
+   * @return The modified StringBuilder
+   */
+  private static StringBuilder removeLastComma(StringBuilder target) {
     return target.deleteCharAt(target.toString().lastIndexOf(','));
+  }
+
+  private static String constructWhereClause(JSONObject jsonObject) {
+
+    return "";
   }
 }

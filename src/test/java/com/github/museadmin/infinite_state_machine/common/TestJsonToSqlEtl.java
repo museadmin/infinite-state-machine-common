@@ -22,7 +22,7 @@ public class TestJsonToSqlEtl {
 
     jsonObject = new JSONObject(
       IOUtils.toString(
-        this.getClass().getResource("/test_data/select_test_data.json"),
+        this.getClass().getResource("/test_data/sql_test_data.json"),
         "UTF-8"
       )
     );
@@ -32,32 +32,34 @@ public class TestJsonToSqlEtl {
   public void testEtlReturnsSqlSelectStatementWithoutWhereClause() {
     ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
     Assert.assertEquals(
-      statements.get(0),
-      "SELECT status, state_flag, note FROM states;");
+      "SELECT status, state_flag, note FROM states;",
+      statements.get(0));
   }
 
   @Test
   public void testEtlReturnsSqlSelectStatementWithWhereClause() {
     ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
     Assert.assertEquals(
-      statements.get(1),
-      "SELECT status, state_flag, note FROM states WHERE status = 'false';");
+      "SELECT status, state_flag, note FROM states " +
+        "WHERE status = 'false';",
+      statements.get(1));
   }
 
   @Test
   public void testEtlReturnsSqlSelectStatementWithWhereClauseAndAnotherclause() {
     ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
     Assert.assertEquals(
-      statements.get(2),
-      "SELECT status, state_flag, note FROM states WHERE status = 'false' AND state_flag = 'READY_TO_RUN';");
+      "SELECT status, state_flag, note FROM states " +
+        "WHERE status = 'false' AND state_flag = 'READY_TO_RUN';",
+      statements.get(2));
   }
 
   @Test
   public void testEtlReturnsSqlSelectStatementWithWildcard() {
     ArrayList<String> statements = JsonToSqlEtl.parseSqlFromJson(jsonObject);
     Assert.assertEquals(
-      statements.get(3),
-      "SELECT * FROM states;");
+      "SELECT * FROM states;",
+      statements.get(3));
   }
 
 }
