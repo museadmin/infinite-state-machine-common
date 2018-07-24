@@ -1,5 +1,6 @@
 package com.github.museadmin.infinite_state_machine.common.dal;
 
+import com.github.museadmin.infinite_state_machine.common.utils.JsonToSqlEtl;
 import com.github.museadmin.infinite_state_machine.lib.PropertyCache;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,6 +21,7 @@ public class Postgres implements IDataAccessLayer {
 
   private Map dbData = new HashMap<String, String>();
   private List<String> comments = new ArrayList<>();
+  private List<String> primaryKeys = new ArrayList<>();
 
   public Postgres(PropertyCache propertyCache, String epochSeconds) {
 
@@ -57,6 +59,8 @@ public class Postgres implements IDataAccessLayer {
       executeSqlStatement(createTableStatement(table));
       comments.forEach(comment -> executeSqlStatement(comment));
       comments.clear();
+      executeSqlStatement(createPrimaryKeys(table));
+      primaryKeys.clear();
   }
 
   /**
@@ -76,6 +80,23 @@ public class Postgres implements IDataAccessLayer {
           System.exit(1);
       }
       return rc;
+  }
+
+  /**
+   * Create any primary keys that were defined for the table
+   */
+  private String createPrimaryKeys(JSONObject table) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("ALTER TABLE " +
+      table.get("name") +
+      " ADD PRIMARY KEY (");
+
+    for (int i = 0; i < primaryKeys.size(); i++) {
+      sql.append(primaryKeys.get(i) + ", ");
+    }
+    sql = JsonToSqlEtl.removeLastComma(sql);
+    sql.append(");");
+    return sql.toString();
   }
 
   /**
@@ -122,8 +143,9 @@ public class Postgres implements IDataAccessLayer {
 
       columns.forEach(column -> {
           JSONObject col = (JSONObject) column;
+          String name = col.getString("name");
 
-          sbSql.append(col.getString("name"));
+          sbSql.append(name);
           sbSql.append(" " + col.getString("type"));
 
           if (col.getBoolean("not_null")) {
@@ -136,14 +158,14 @@ public class Postgres implements IDataAccessLayer {
           }
 
           if (col.getBoolean("primary_key")) {
-              sbSql.append(" PRIMARY KEY");
+            primaryKeys.add(name);
           }
 
           sbSql.append(", ");
 
           String comment = col.getString("comment");
           if (! comment.isEmpty()) { comments.add("COMMENT ON COLUMN " +
-                  table.get("table_name") + "." +
+                  table.get("name") + "." +
                   col.getString("name") + " is '" +
                   comment + "';"
               );

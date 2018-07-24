@@ -63,6 +63,45 @@ public class JsonToSqlEtl {
     return beginning + where.trim() + end;
   }
 
+  /**
+   * Create SQL INSERT statement defined in an Action Pack's pack_data JSONObject
+   * @param jsonObject One of the items from an Action Pack's pack_data file
+   * @return ArrayList<String>The SQL INSERT statements</String>
+   */
+  private static ArrayList <String> parseInsertStatements(JSONObject jsonObject) {
+    ArrayList <String> statements  = new ArrayList<>();
+    String tableName = jsonObject.getJSONObject("meta").get("table").toString();
+
+    // Build the front end of the insert statement
+    StringBuilder start = new StringBuilder();
+    start.append("INSERT INTO " + tableName + " (");
+
+    // Add the columns
+    start = addColumns(jsonObject, start);
+
+    start.append(") values (");
+    String beginning = start.toString();
+
+    // Create the end of the insert statement
+    String end = ");";
+
+    // Create the middle of each insert statement
+    JSONArray valuesArray = jsonObject.getJSONArray("values");
+    for (int i = 0; i < valuesArray.length(); i++) {
+      StringBuilder middle = new StringBuilder();
+      JSONArray values = valuesArray.getJSONArray(i);
+      for (int j = 0; j < values.length(); j++) {
+        middle.append("'" + values.get(j).toString() + "', ");
+      }
+      middle = removeLastComma(middle);
+
+      // Push the statement into the statements list
+      statements.add(beginning + middle.toString() + end);
+    }
+
+    return statements;
+  }
+
   /** Create SQL UPDATE statement defined in an Action Pack's pack_data JSONObject
    * @param jsonObject One of the items from an Action Pack's pack_data file
    * @return String. The SQL UPDATE Statement
@@ -188,51 +227,11 @@ public class JsonToSqlEtl {
   }
 
   /**
-   * Create SQL INSERT statement defined in an Action Pack's pack_data JSONObject
-   * @param jsonObject One of the items from an Action Pack's pack_data file
-   * @return ArrayList<String>The SQL INSERT statements</String>
-   */
-  private static ArrayList <String> parseInsertStatements(JSONObject jsonObject) {
-    ArrayList <String> statements  = new ArrayList<>();
-    String tableName = jsonObject.getJSONObject("meta").get("table").toString();
-
-    // Build the front end of the insert statement
-    StringBuilder start = new StringBuilder();
-    start.append("INSERT INTO " + tableName + " (");
-    JSONArray columns = jsonObject.getJSONArray("columns");
-    for (int i = 0; i < columns.length(); i++) {
-      start.append("'" + columns.get(i).toString() + "', ");
-    }
-    start = removeLastComma(start);
-    start.append(") values (");
-    String beginning = start.toString();
-
-    // Create the end of the insert statement
-    String end = ");";
-
-    // Create the middle of each insert statement
-    JSONArray valuesArray = jsonObject.getJSONArray("values");
-    for (int i = 0; i < valuesArray.length(); i++) {
-      StringBuilder middle = new StringBuilder();
-      JSONArray values = valuesArray.getJSONArray(i);
-      for (int j = 0; j < values.length(); j++) {
-        middle.append("'" + values.get(j).toString() + "', ");
-      }
-      middle = removeLastComma(middle);
-
-      // Push the statement into the statements list
-      statements.add(beginning + middle.toString() + end);
-    }
-
-    return statements;
-  }
-
-  /**
    * Utility method to remove the last comma from a StringBuilder
    * @param target The StringBuilder to modify
    * @return The modified StringBuilder
    */
-  private static StringBuilder removeLastComma(StringBuilder target) {
+  public static StringBuilder removeLastComma(StringBuilder target) {
     return target.deleteCharAt(target.toString().lastIndexOf(','));
   }
 }
