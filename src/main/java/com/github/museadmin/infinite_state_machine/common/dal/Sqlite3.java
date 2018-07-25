@@ -5,8 +5,10 @@ import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  * Data Access Object for when using Sqlite3
@@ -38,6 +40,37 @@ public class Sqlite3 implements IDataAccessLayer {
    */
   public void createTable(JSONObject table) {
       executeSqlStatement(createTableStatement(table));
+  }
+
+  /**
+   * Execute a SQL query and return the results in an array list
+   * @param sql The query
+   * @return ArrayList<String> the records returned
+   */
+  public ArrayList<String> executeSqlQuery(String sql) {
+
+    ArrayList<String> resultList = new ArrayList<>();
+
+    try {
+      Connection connection = getConnection(database);
+      Statement statement = connection.createStatement();
+      ResultSet results = statement.executeQuery(sql);
+
+      int columnCount = results.getMetaData().getColumnCount();
+
+      while (results.next()) {
+        int i = 0;
+        while(i < columnCount) {
+          resultList.add(results.getString(i++));
+        }
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      System.exit(1);
+    }
+    return resultList;
   }
 
   /**

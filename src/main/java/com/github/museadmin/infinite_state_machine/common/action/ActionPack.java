@@ -51,7 +51,7 @@ public class ActionPack implements IActionPack {
    * Use introspection to read in all of the classes in a given action pack
    * Filter out the ones that are actions and return them in an array
    */
-  public ArrayList getActionsFromActionPack() {
+  public ArrayList getActionsFromActionPack(InfiniteStateMachine ism) {
     String packageName = this.getClass().getPackage().getName();
 
     List<ClassLoader> classLoadersList = new LinkedList<>();
@@ -69,6 +69,7 @@ public class ActionPack implements IActionPack {
     for (Class a : classes) {
       try {
         Action action = (Action) Class.forName(a.getName()).newInstance();
+        // TODO Can I add a reference to the importing ISM here?
         actions.add(action);
       } catch (ClassNotFoundException e) {
         e.printStackTrace();
