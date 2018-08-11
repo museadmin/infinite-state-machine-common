@@ -1,5 +1,6 @@
 package com.github.museadmin.infinite_state_machine.common;
 
+
 import com.github.museadmin.infinite_state_machine.common.utils.JsonToSqlEtl;
 import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
