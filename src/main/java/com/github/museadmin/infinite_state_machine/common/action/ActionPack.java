@@ -32,7 +32,8 @@ public class ActionPack implements IActionPack {
    * @return JSONObject containing the data
    */
   public JSONObject getJsonObjectFromResourceFile(String fileName) {
-    InputStream is = ClassLoader.getSystemResourceAsStream(fileName);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    InputStream is = loader.getResourceAsStream(fileName);
     InputStreamReader isr;
     BufferedReader br;
     StringBuilder sb = new StringBuilder();
@@ -60,8 +61,9 @@ public class ActionPack implements IActionPack {
     DataAccessLayer dataAccessLayer,
     String runRoot
   ) {
-    String packageName = this.getClass().getPackage().getName();
 
+    String packageName = this.getClass().getPackage().getName();
+    int x = 0;
     List<ClassLoader> classLoadersList = new LinkedList<>();
     classLoadersList.add(ClasspathHelper.contextClassLoader());
     classLoadersList.add(ClasspathHelper.staticClassLoader());
