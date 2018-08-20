@@ -63,7 +63,6 @@ public class ActionPack implements IActionPack {
   ) {
 
     String packageName = this.getClass().getPackage().getName();
-    int x = 0;
     List<ClassLoader> classLoadersList = new LinkedList<>();
     classLoadersList.add(ClasspathHelper.contextClassLoader());
     classLoadersList.add(ClasspathHelper.staticClassLoader());
