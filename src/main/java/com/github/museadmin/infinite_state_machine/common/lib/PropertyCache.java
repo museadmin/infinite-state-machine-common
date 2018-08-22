@@ -17,21 +17,6 @@ public class PropertyCache {
   private static final Logger LOGGER = LoggerFactory.getLogger(PropertyCache.class.getName());
 
   /**
-   * Reads the values in a properties file and caches them for later retrieval.
-   *
-   * @param file The name of the properties file.
-   */
-  public PropertyCache(String file) {
-    try
-    {
-      prop.load(ClassLoader.getSystemResourceAsStream(file));
-    } catch (IOException e) {
-      LOGGER.error(e.getClass().getName() + ": " + e.getMessage());
-      System.exit(1);
-    }
-  }
-
-  /**
    * Import properties from an external file
    * @param file Fully qualified path to file
    */
@@ -64,6 +49,10 @@ public class PropertyCache {
    */
   public String getProperty(String key, String defaultValue) {
     return prop.getProperty(key, defaultValue);
+  }
+
+  public void setProperty(String property, String value) {
+    prop.setProperty(property, value);
   }
 
 }

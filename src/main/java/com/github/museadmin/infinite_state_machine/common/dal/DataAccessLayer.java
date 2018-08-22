@@ -1,5 +1,6 @@
 package com.github.museadmin.infinite_state_machine.common.dal;
 
+import com.github.museadmin.infinite_state_machine.common.lib.PropertyCache;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -15,29 +16,29 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Create the runtime control database
-   * @param rdbms The type of DB we're using
-   * @param runRoot The top level directory created for the run
-   * @param epochSeconds Used to create a unique DB identifier. Ignored by SQLITE3
+   * @param propertyCache So we can get the connection details
    */
-  public DataAccessLayer(String rdbms, String runRoot, String epochSeconds) {
+  public DataAccessLayer(PropertyCache propertyCache) {
 
-    if (rdbms.equalsIgnoreCase("SQLITE3")) {
+    if (propertyCache.getProperty("rdbms").equalsIgnoreCase("SQLITE3")) {
 
       // Create the runtime dir for the sqlite3 db
-      String dbPath = runRoot +
+      String dbPath = propertyCache.getProperty("runRoot") +
         File.separator +
         "control" +
         File.separator +
         "database";
       File dir = new File (dbPath);
-      if (! dir.isDirectory()) { dir.mkdirs(); }
+      if (! dir.isDirectory()) {
+        dir.mkdirs();
+      }
       String dbFile = dbPath + File.separator + "ism.db";
 
       // Create the database itself
       iDataAccessObject = new Sqlite3(dbFile);
 
-//    } else if (rdbms.equalsIgnoreCase("POSTGRES")) {
-//      iDataAccessObject = new Postgres(propertyCache, epochSeconds);
+    } else if (propertyCache.getProperty("rdbms").equalsIgnoreCase("MYSQL")) {
+      iDataAccessObject = new Mysql(propertyCache);
     } else {
       throw new RuntimeException("Failed to identify RDBMS in use from property file");
     }
