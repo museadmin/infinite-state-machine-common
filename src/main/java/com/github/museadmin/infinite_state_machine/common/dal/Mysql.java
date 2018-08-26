@@ -217,6 +217,18 @@ public class Mysql implements IDataAccessObject {
     return sbSql.toString();
   }
 
+  /**
+   * Load a sql file into the database
+   *
+   * @param fileName
+   *        Fully qualified path to the file
+   * @param tearDown
+   *        Delete the file after loading
+   */
+  public void loadSqlFile(String fileName, boolean tearDown) {
+
+  }
+
   // ================= Action =================
 
   /**

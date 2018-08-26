@@ -16,6 +16,7 @@ public interface IDataAccessObject {
   void createTable(JSONObject table);
   Boolean executeSqlStatement(String sql);
   ArrayList<JSONObject> executeSqlQuery(String sql);
+  void loadSqlFile(String fileName, boolean tearDown);
 
   // ================= Hooks =================
   Boolean beforeActionsComplete();

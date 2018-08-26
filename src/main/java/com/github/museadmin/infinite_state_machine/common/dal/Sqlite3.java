@@ -3,6 +3,8 @@ package com.github.museadmin.infinite_state_machine.common.dal;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,6 +13,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static com.github.museadmin.infinite_state_machine.common.action.Action.LOGGER;
 
 /**
  * Data Access Object for when using Sqlite3
@@ -25,7 +29,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Constructor attempts to create a new database
-   * @param database Fully qualified path to DB
+   *
+   * @param database
+   *        Fully qualified path to DB
    */
   public Sqlite3(String database) {
     this.database = database;
@@ -34,7 +40,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Create a unique database instance for the run
-   * @param database Fully qualified name of the DB
+   *
+   * @param database
+   *        Fully qualified name of the DB
    */
   public void createDatabase(String database) {
     getConnection(database);
@@ -44,8 +52,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Execute a SQL query and return the results in an array list
-   * @param sql The query
-   * @return ArrayList holds the records returned
+   *
+   * @param sql
+   *        The query
+   * @return
+   *        ArrayList holds the records returned
    */
   public ArrayList<JSONObject> executeSqlQuery(String sql) {
 
@@ -77,8 +88,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Executes a SQL statement
-   * @param sql The statement to execute
-   * @return True or False for success or failure
+   *
+   * @param sql
+   *        The statement to execute
+   * @return
+   *        True or False for success or failure
    */
   public Boolean executeSqlStatement(String sql)  {
     Boolean rc = false;
@@ -97,8 +111,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Return a connection to the sqlite3 database
-   * @param database The fully qualified path to the database
-   * @return Connection
+   *
+   * @param database
+   *        The fully qualified path to the database
+   * @return
+   *        Connection
    */
   private Connection getConnection(String database){
     Connection connection = null;
@@ -114,7 +131,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Create a database table using a JSON definition
-   * @param table JSONObject
+   *
+   * @param table
+   *        JSONObject
    */
   public void createTable(JSONObject table) {
     executeSqlStatement(createTableStatement(table));
@@ -122,8 +141,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * SQLite3 context aware CREATE TABLE statement builder
-   * @param table JSONObject created from JSON defintion file
-   * @return String Create table statement
+   *
+   * @param table
+   *        JSONObject created from JSON defintion file
+   * @return
+   *        String Create table statement
    */
   private String createTableStatement(JSONObject table) {
 
@@ -184,11 +206,35 @@ public class Sqlite3 implements IDataAccessObject {
     return sbSql.toString();
   }
 
+  /**
+   * Load a sql file into the database
+   *
+   * @param file
+   *        Fully qualified path to the file
+   * @param tearDown
+   *        Delete the file after loading
+   */
+  public void loadSqlFile(String file, boolean tearDown) {
+
+    File in = new File(file);
+    if (in.exists()) {
+      try {
+        ProcessBuilder builder = new ProcessBuilder("sqlite3", database);
+        builder.redirectInput(in);
+        builder.start();
+      } catch (IOException e) {
+        LOGGER.error("Failed to load sql file (" + file + ")");
+      }
+    }
+  }
+
   // ================= Action =================
 
   /**
    * Test if this action is active
-   * @return True or False for not active
+   *
+   * @return
+   *        True or False for not active
    */
   public Boolean active(String actionName) {
 
@@ -202,7 +248,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Activate an action.
-   * @param actionName The name of the axction to activate
+   *
+   * @param actionName
+   *        The name of the axction to activate
    */
   public void activate(String actionName) {
     executeSqlStatement(
@@ -222,7 +270,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Clear the payload for an action prior to deactivation
-   * @param actionName The name of the action
+   *
+   * @param actionName
+   *        The name of the action
    */
   public void clearPayload(String actionName) {
     executeSqlStatement(
@@ -232,7 +282,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Update the payload for an action
-   * @param actionName The name of the action
+   *
+   * @param actionName
+   *        The name of the action
    */
   public void updatePayload(String actionName, String payload) {
     executeSqlStatement(
@@ -245,7 +297,9 @@ public class Sqlite3 implements IDataAccessObject {
   /**
    * Check if all "After" actions have completed so that we can
    * change state to STOPPED.
-   * @return True if not all complete
+   *
+   * @return
+   *        True if not all complete
    */
   public Boolean afterActionsComplete() {
 
@@ -258,7 +312,9 @@ public class Sqlite3 implements IDataAccessObject {
   /**
    * Check if all "Before" actions have completed so that we can
    * change state to running.
-   * @return True if not all complete
+   *
+   * @return
+   *        True if not all complete
    */
   public Boolean beforeActionsComplete() {
 
@@ -272,8 +328,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Insert a new property into the properties table
-   * @param property The name of the property
-   * @param value The value of the property
+   *
+   * @param property
+   *        The name of the property
+   * @param value
+   *        The value of the property
    */
   public void insertProperty(String property, String value) {
     executeSqlStatement(
@@ -283,8 +342,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Update an existing property in the properties table
-   * @param property The name of the property
-   * @param value The value of the property
+   *
+   * @param property
+   *        The name of the property
+   * @param value
+   *        The value of the property
    */
   public void updateProperty(String property, String value) {
     executeSqlStatement(
@@ -294,8 +356,11 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Query a property in the properties table
-   * @param property Name of the property
-   * @return value of the property
+   *
+   * @param property
+   *        Name of the property
+   * @return
+   *        value of the property
    */
   public String queryProperty(String property) {
 
@@ -315,7 +380,9 @@ public class Sqlite3 implements IDataAccessObject {
    * RUNNING
    * STARTING
    * STOPPED
-   * @param runPhase Name of state to change to
+   *
+   * @param runPhase
+   *        Name of state to change to
    */
   public void updateRunPhase(String runPhase) {
 
@@ -340,7 +407,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Return the active run phase
-   * @return The name of the active run phase
+   *
+   * @return
+   *        The name of the active run phase
    */
   public String queryRunPhase() {
     ArrayList<JSONObject> results = executeSqlQuery(
@@ -353,7 +422,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Set a state in the state table
-   * @param stateName The name of the state
+   *
+   * @param stateName
+   *        The name of the state
    */
   public void setState(String stateName) {
     executeSqlStatement(
@@ -363,7 +434,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Unset a state in the state table
-   * @param stateName The name of the state
+   *
+   * @param stateName
+   *        The name of the state
    */
   public void unsetState(String stateName) {
     executeSqlStatement(
@@ -375,7 +448,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Insert a message into the database. Assumes valid json object.
-   * @param message JSONObject the message
+   *
+   * @param message
+   *        JSONObject the message
    */
   public void insertMessage(JSONObject message) {
 
@@ -405,7 +480,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Retrieve an array of unprocessed messages form the database messages table
-   * @return ArrayList of messages as JSONObjects
+   *
+   * @return
+   * ArrayList of messages as JSONObjects
    */
   public ArrayList<JSONObject> getUnprocessedMessages() {
     return executeSqlQuery(
@@ -415,7 +492,9 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * Set the processed field true of a message record
-   * @param id The ID (PK) of the record
+   *
+   * @param id
+   *        The ID (PK) of the record
    */
   public void markMessageProcessed(Integer id) {
     executeSqlStatement(

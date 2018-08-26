@@ -16,7 +16,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Create the runtime control database
-   * @param propertyCache So we can get the connection details
+   *
+   * @param propertyCache
+   *        So we can get the connection details etc.
    */
   public DataAccessLayer(PropertyCache propertyCache) {
 
@@ -48,8 +50,11 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Execute a SQL query and return the results in an array list
-   * @param sql The query
-   * @return ArrayList holds the records returned
+   *
+   * @param sql
+   *        The query
+   * @return
+   *        ArrayList holds the records returned
    */
   public ArrayList<JSONObject> executeSqlQuery(String sql) {
     return iDataAccessObject.executeSqlQuery(sql);
@@ -57,8 +62,11 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Executes a SQL statement
-   * @param sql The statement to execute
-   * @return True or False for success or failure
+   *
+   * @param sql
+   *        The statement to execute
+   * @return
+   *        True or False for success or failure
    */
   public Boolean executeSqlStatement(String sql) {
     return iDataAccessObject.executeSqlStatement(sql);
@@ -66,17 +74,33 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Create a database table using a JSON definition
-   * @param table JSONObject
+   *
+   * @param table
+   *        JSONObject
    */
   public void createTable(JSONObject table) {
     iDataAccessObject.createTable(table);
+  }
+
+  /**
+   * Load a sql file into the database
+   *
+   * @param fileName
+   *        Fully qualified path to the file
+   * @param tearDown
+   *        Delete the file after loading
+   */
+  public void loadSqlFile(String fileName, boolean tearDown) {
+    iDataAccessObject.loadSqlFile(fileName, tearDown);
   }
 
   // ================= Action =================
 
   /**
    * Test if this action is active
-   * @return True or False for not active
+   *
+   * @return
+   *        True or False for not active
    */
   public Boolean active(String actionName) {
     return iDataAccessObject.active(actionName);
@@ -84,7 +108,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Activate an action.
-   * @param actionName The name of the action to activate
+   *
+   * @param actionName
+   *        The name of the action to activate
    */
   public void activate(String actionName) {
     iDataAccessObject.activate(actionName);
@@ -92,7 +118,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Deactivate an action.
-   * @param actionName The name of the action to deactivate
+   *
+   * @param actionName
+   *        The name of the action to deactivate
    */
   public void deactivate(String actionName) {
     iDataAccessObject.deactivate(actionName);
@@ -100,7 +128,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Clear the payload for an action prior to deactivation
-   * @param actionName The name of the action
+   *
+   * @param actionName
+   *        The name of the action
    */
   public void clearPayload(String actionName) {
     iDataAccessObject.clearPayload(actionName);
@@ -108,8 +138,11 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Set the payload for an action
-   * @param actionName The name of the action
-   * @param payload The action's payload
+   *
+   * @param actionName
+   *        The name of the action
+   * @param payload
+   *        The action's payload
    */
   public void updatePayload(String actionName, String payload) {
     iDataAccessObject.updatePayload(actionName, payload);
@@ -120,7 +153,8 @@ public class DataAccessLayer implements IDataAccessObject {
   /**
    * Check if all "After" actions have completed so that we can
    * change state to STOPPED.
-   * @return True if not all complete
+   * @return
+   *        True if not all complete
    */
   public Boolean afterActionsComplete() {
     return iDataAccessObject.afterActionsComplete();
@@ -129,7 +163,9 @@ public class DataAccessLayer implements IDataAccessObject {
   /**
    * Check if all "Before" actions have completed so that we can
    * change state to running.
-   * @return True if all complete
+   *
+   * @return
+   *        True if all complete
    */
   public Boolean beforeActionsComplete() {
     return iDataAccessObject.beforeActionsComplete();
@@ -148,8 +184,11 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Query a property in the properties table
-   * @param property Name of the property
-   * @return value of the property
+   *
+   * @param property
+   *        Name of the property
+   * @return
+   *        value of the property
    */
   public String queryProperty(String property) {
     return iDataAccessObject.queryProperty(property);
@@ -157,8 +196,11 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Update an existing property in the properties table
-   * @param property The name of the property
-   * @param value The value of the property
+   *
+   * @param property
+   *        The name of the property
+   * @param value
+   *        The value of the property
    */
   public void updateProperty(String property, String value) {
     iDataAccessObject.updateProperty(property, value);
@@ -168,7 +210,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Return the active run phase
-   * @return The name of the active run phase
+   *
+   * @return
+   *        The name of the active run phase
    */
   public String queryRunPhase() {
     return iDataAccessObject.queryRunPhase();
@@ -182,7 +226,9 @@ public class DataAccessLayer implements IDataAccessObject {
    * RUNNING
    * STARTING
    * STOPPED
-   * @param runPhase Name of state to change to
+   *
+   * @param runPhase
+   *        Name of state to change to
    */
   public void updateRunPhase(String runPhase) {
     iDataAccessObject.updateRunPhase(runPhase);
@@ -192,7 +238,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Set a state in the state table
-   * @param stateName The name of the state
+   *
+   * @param stateName
+   *        The name of the state
    */
   public void setState(String stateName) {
     iDataAccessObject.setState(stateName);
@@ -200,7 +248,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Unset a state in the state table
-   * @param stateName The name of the state
+   *
+   * @param stateName
+   *        The name of the state
    */
   public void unsetState(String stateName) {
     iDataAccessObject.unsetState(stateName);
@@ -209,7 +259,9 @@ public class DataAccessLayer implements IDataAccessObject {
   // ================= Message  =================
   /**
    * Insert a message into the database. Assumes valid json object.
-   * @param message JSONObject the message
+   *
+   * @param message
+   *        JSONObject the message
    */
   public void insertMessage(JSONObject message) {
     iDataAccessObject.insertMessage(message);
@@ -217,7 +269,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Retrieve an array of unprocessed messages form the database messages table
-   * @return ArrayList of messages as JSONObjects
+   *
+   * @return
+   *        ArrayList of messages as JSONObjects
    */
   public ArrayList<JSONObject> getUnprocessedMessages() {
     return iDataAccessObject.getUnprocessedMessages();
@@ -225,7 +279,9 @@ public class DataAccessLayer implements IDataAccessObject {
 
   /**
    * Set the processed field true of a message record
-   * @param id The ID (PK) of the record
+   *
+   * @param id
+   *        The ID (PK) of the record
    */
   public void markMessageProcessed(Integer id) {
     iDataAccessObject.markMessageProcessed(id);
