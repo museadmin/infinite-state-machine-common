@@ -1,7 +1,10 @@
 package com.github.museadmin.infinite_state_machine.common.dal;
 
+import com.github.museadmin.infinite_state_machine.common.action.Action;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +17,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.github.museadmin.infinite_state_machine.common.action.Action.LOGGER;
-
 /**
  * Data Access Object for when using Sqlite3
  */
 public class Sqlite3 implements IDataAccessObject {
+
+  public static final Logger LOGGER = LoggerFactory.getLogger(Action.class.getName());
 
   private String database;
   public String SQLITE_TRUE = "1";
@@ -225,6 +228,9 @@ public class Sqlite3 implements IDataAccessObject {
       } catch (IOException e) {
         LOGGER.error("Failed to load sql file (" + file + ")");
       }
+    }
+    if (tearDown && in.exists()) {
+      in.delete();
     }
   }
 

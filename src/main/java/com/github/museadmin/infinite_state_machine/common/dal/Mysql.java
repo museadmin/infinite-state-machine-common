@@ -1,9 +1,14 @@
 package com.github.museadmin.infinite_state_machine.common.dal;
 
+import com.github.museadmin.infinite_state_machine.common.action.Action;
 import com.github.museadmin.infinite_state_machine.common.lib.PropertyCache;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -17,6 +22,8 @@ import java.util.Arrays;
  * Data Access Object for when using Mysql
  */
 public class Mysql implements IDataAccessObject {
+
+  public static final Logger LOGGER = LoggerFactory.getLogger(Action.class.getName());
 
   private PropertyCache propertyCache;
   private String dbName;
@@ -36,13 +43,35 @@ public class Mysql implements IDataAccessObject {
     this.propertyCache = propertyCache;
 
     // connectionUrl without db name
-    this.connectionUrl = "jdbc:mysql://" +
-      propertyCache.getProperty("dbHost") +
-      ":" + propertyCache.getProperty("dbPort");
+    this.connectionUrl = String.format(
+      "jdbc:mysql://%s:%s",
+      propertyCache.getProperty("dbHost"),
+      propertyCache.getProperty("dbPort")
+    );
 
-    // Drop and recreate the runtime DB
-    dropDatabase();
-    createDatabase();
+    switch (propertyCache.getProperty("dbMode").toLowerCase()) {
+      case "overwrite":
+        // Drop and recreate the runtime DB
+        dropDatabase();
+        createDatabase();
+        break;
+      case "append":
+        // Write to an existing DB if exists
+        createDatabase();
+        break;
+      case "unique":
+        // create a new database with the run tag in its name
+        // TODO
+        createDatabase();
+        break;
+      default:
+        String err = String.format(
+          "Invalid dbMode (%s)",
+          propertyCache.getProperty("dbMode")
+        );
+        LOGGER.error(err);
+        throw new RuntimeException(err);
+    }
 
     // Add the database name to the url
     this.connectionUrl = String.format(
@@ -134,7 +163,8 @@ public class Mysql implements IDataAccessObject {
       return DriverManager.getConnection(
         connectionUrl,
         propertyCache.getProperty("dbUser"),
-        propertyCache.getProperty("dbPassword"));
+        propertyCache.getProperty("dbPassword")
+      );
     } catch (SQLException e) {
       e.printStackTrace();
       System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -220,13 +250,30 @@ public class Mysql implements IDataAccessObject {
   /**
    * Load a sql file into the database
    *
-   * @param fileName
+   * @param file
    *        Fully qualified path to the file
    * @param tearDown
    *        Delete the file after loading
    */
-  public void loadSqlFile(String fileName, boolean tearDown) {
+  public void loadSqlFile(String file, boolean tearDown) {
 
+    File in = new File(file);
+    if (in.exists()) {
+      try {
+        ProcessBuilder builder = new ProcessBuilder(
+          "mysql",
+          "-u" + propertyCache.getProperty("dbUser"),
+          "-p" + propertyCache.getProperty("dbPassword")
+        );
+        builder.redirectInput(in);
+        builder.start();
+      } catch (IOException e) {
+        LOGGER.error("Failed to load sql file (" + file + ")");
+      }
+    }
+    if (tearDown && in.exists()) {
+      in.delete();
+    }
   }
 
   // ================= Action =================
