@@ -4,6 +4,7 @@ import com.github.museadmin.infinite_state_machine.common.lib.PropertyCache;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -23,16 +24,17 @@ public class DataAccessLayer implements IDataAccessObject {
     if (propertyCache.getProperty("rdbms").equalsIgnoreCase("SQLITE3")) {
 
       // Create the runtime dir for the sqlite3 db
-      String dbPath = propertyCache.getProperty("runRoot") +
-        File.separator +
-        "control" +
-        File.separator +
-        "database";
+      String dbPath = Paths.get(
+        propertyCache.getProperty("runRoot") ,
+        "control",
+        "database"
+      ).toString();
+
       File dir = new File (dbPath);
       if (! dir.isDirectory()) {
         dir.mkdirs();
       }
-      String dbFile = dbPath + File.separator + "ism.db";
+      String dbFile = Paths.get(dbPath, propertyCache.getProperty("schema")).toString();
 
       // Create the database itself
       iDataAccessObject = new Sqlite3(dbFile);

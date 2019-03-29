@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 
@@ -26,7 +27,7 @@ public abstract class Action implements IAction {
   // ==================== Getter + Setters ====================
 
   /**
-   * Assigne a reference to the DAL to the action
+   * Assign a reference to the DAL to the action
    * @param dataAccessLayer The DAL
    */
   public void setDataAccessLayer(DataAccessLayer dataAccessLayer) {
@@ -219,7 +220,7 @@ public abstract class Action implements IAction {
    */
   public String createRunDirectory(String directory) {
 
-    String path = runRoot + File.separator + directory;
+    String path = Paths.get(runRoot , directory).toString();
 
     File target = new File(path);
     if (! target.isDirectory()) {

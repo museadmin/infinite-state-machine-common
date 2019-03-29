@@ -48,7 +48,7 @@ public class Mysql implements IDataAccessObject {
     this.connectionUrl = String.format(
       "%s/%s",
       this.connectionUrl,
-      propertyCache.getProperty("dbName")
+      propertyCache.getProperty("schema")
     );
   }
 
@@ -62,11 +62,11 @@ public class Mysql implements IDataAccessObject {
   }
 
   /**
-   * Create a unique database instance for the run
+   * Create a database instance for the run
    */
   public void createDatabase() {
     executeSqlStatement(
-      String.format("CREATE DATABASE IF NOT EXISTS %s;", propertyCache.getProperty("dbName"))
+      String.format("CREATE DATABASE IF NOT EXISTS %s;", propertyCache.getProperty("schema"))
     );
   }
 
@@ -171,7 +171,11 @@ public class Mysql implements IDataAccessObject {
       sbSql.append(col.getString("name"));
 
       // TODO TEXT changes to VARCHAR
-      sbSql.append(" " + col.getString("type"));
+      if (col.getString("type").equalsIgnoreCase("TEXT")) {
+        sbSql.append(" " + "VARCHAR");
+      } else {
+        sbSql.append(" " + col.getString("type"));
+      }
 
       if (col.getBoolean("not_null")) {
         sbSql.append(" NOT NULL");
@@ -200,6 +204,7 @@ public class Mysql implements IDataAccessObject {
 
       sbSql.append(", ");
 
+      // TODO What is the syntax for adding comments to MySql?
       String comment = col.getString("comment");
       if (! comment.isEmpty()) {
         sbSql.append("-- " + comment);

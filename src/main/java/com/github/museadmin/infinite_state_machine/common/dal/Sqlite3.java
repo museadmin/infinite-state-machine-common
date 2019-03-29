@@ -122,8 +122,8 @@ public class Sqlite3 implements IDataAccessObject {
 
   /**
    * SQLite3 context aware CREATE TABLE statement builder
-   * @param table JSONObject created from JSON defintion file
-   * @return String Create table statement
+   * @param table JSONObject created from JSON definition file
+   * @return String form of create table statement
    */
   private String createTableStatement(JSONObject table) {
 
@@ -132,9 +132,8 @@ public class Sqlite3 implements IDataAccessObject {
     sbSql.append(table.get("name"));
     sbSql.append(" (\n");
 
-    JSONArray columns = table.getJSONArray("columns");
+    table.getJSONArray("columns").forEach(column -> {
 
-    columns.forEach(column -> {
       JSONObject col = (JSONObject) column;
 
       sbSql.append(col.getString("name"));
