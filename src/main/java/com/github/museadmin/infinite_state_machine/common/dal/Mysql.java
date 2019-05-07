@@ -40,7 +40,7 @@ public class Mysql implements IDataAccessObject {
       propertyCache.getProperty("dbHost") +
       ":" + propertyCache.getProperty("dbPort");
 
-    // Drop and recreate the runtime DB
+    // Drop and recreate the runtime DB TODO make optional
     dropDatabase();
     createDatabase();
 
@@ -66,7 +66,7 @@ public class Mysql implements IDataAccessObject {
    */
   public void createDatabase() {
     executeSqlStatement(
-      String.format("CREATE DATABASE IF NOT EXISTS %s;", propertyCache.getProperty("schema"))
+      String.format("CREATE DATABASE %s;", propertyCache.getProperty("schema"))
     );
   }
 
