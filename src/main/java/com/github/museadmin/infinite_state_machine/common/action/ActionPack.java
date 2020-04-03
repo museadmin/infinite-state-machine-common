@@ -68,8 +68,13 @@ public class ActionPack implements IActionPack {
     classLoadersList.add(ClasspathHelper.staticClassLoader());
 
     Reflections reflections = new Reflections(new ConfigurationBuilder()
+<<<<<<< HEAD
       .setUrls(ClasspathHelper.forPackage(packageName))
       .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(packageName))));
+=======
+      .setUrls(ClasspathHelper.forPackage(packageName, new ClassLoader[0]))
+        .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(packageName))));
+>>>>>>> master
 
     Set<Class<? extends Action>> classes = reflections.getSubTypesOf(Action.class);
     ArrayList<IAction> actions = new ArrayList<>();
