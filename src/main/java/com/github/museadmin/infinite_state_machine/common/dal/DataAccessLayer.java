@@ -15,32 +15,30 @@ public class DataAccessLayer implements IDataAccessObject {
   IDataAccessObject iDataAccessObject;
 
   /**
-   * Create the runtime control database
+   * Create the control database for the state machine
    * @param propertyCache So we can get the connection details
    */
   public DataAccessLayer(PropertyCache propertyCache) {
 
-    if (propertyCache.getProperty("rdbms").equalsIgnoreCase("SQLITE3")) {
-
-      // Create the runtime dir for the sqlite3 db
-      String dbPath = propertyCache.getProperty("runRoot") +
-        File.separator +
-        "control" +
-        File.separator +
-        "database";
-      File dir = new File (dbPath);
-      if (! dir.isDirectory()) {
-        dir.mkdirs();
-      }
-      String dbFile = dbPath + File.separator + "ism.db";
-
-      // Create the database itself
-      iDataAccessObject = new Sqlite3(dbFile);
-
-    } else if (propertyCache.getProperty("rdbms").equalsIgnoreCase("MYSQL")) {
-      iDataAccessObject = new Mysql(propertyCache);
-    } else {
-      throw new RuntimeException("Failed to identify RDBMS in use from property file");
+    switch (propertyCache.getProperty("rdbms").toUpperCase()) {
+      case "SQLITE3":
+        String dbPath = propertyCache.getProperty("runRoot") +
+            propertyCache.getProperty("dbPath");
+        // Create the runtime directory for the db here as it isn't
+        // needed for the other rdbms types.
+        File dir = new File (dbPath);
+        if (! dir.isDirectory()) {
+          dir.mkdirs();
+        }
+        String dbFile = dbPath + File.separator + propertyCache.getProperty("dbName");
+        iDataAccessObject = new Sqlite3(dbFile);
+        break;
+        // TODO reinstate when doing MySql layer
+//      case "MYSQL":
+//        iDataAccessObject = new Mysql(propertyCache);
+//        break;
+      default:
+        throw new RuntimeException("Failed to identify RDBMS in use from property file");
     }
   }
 
@@ -68,7 +66,7 @@ public class DataAccessLayer implements IDataAccessObject {
    * Create a database table using a JSON definition
    * @param table JSONObject
    */
-  public void createTable(JSONObject table) {
+  public void createTable(String table) {
     iDataAccessObject.createTable(table);
   }
 

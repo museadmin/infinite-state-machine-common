@@ -38,7 +38,7 @@ public class PropertyCache {
    * @return The property or null if not found.
    */
   public String getProperty(String key) {
-    return prop.getProperty(key);
+    return prop.getProperty(key).trim();
   }
 
   /**

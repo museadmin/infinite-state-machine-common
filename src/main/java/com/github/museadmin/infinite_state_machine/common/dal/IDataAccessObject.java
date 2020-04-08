@@ -13,7 +13,7 @@ public interface IDataAccessObject {
   void updatePayload(String actionName, String payload);
 
   // ================= DB =================
-  void createTable(JSONObject table);
+  void createTable(String table);
   Boolean executeSqlStatement(String sql);
   ArrayList<JSONObject> executeSqlQuery(String sql);
 

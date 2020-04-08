@@ -116,11 +116,12 @@ public class Sqlite3 implements IDataAccessObject {
    * Create a database table using a JSON definition
    * @param table JSONObject
    */
-  public void createTable(JSONObject table) {
-    executeSqlStatement(createTableStatement(table));
+  public void createTable(String table) {
+    executeSqlStatement(table);
   }
 
   /**
+   * TODO Delete after refactor for using SQL strings
    * SQLite3 context aware CREATE TABLE statement builder
    * @param table JSONObject created from JSON defintion file
    * @return String Create table statement

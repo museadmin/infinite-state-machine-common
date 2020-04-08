@@ -16,7 +16,7 @@ import java.util.Arrays;
 /**
  * Data Access Object for when using Mysql
  */
-public class Mysql implements IDataAccessObject {
+public class Mysql { //implements IDataAccessObject {
 
   private PropertyCache propertyCache;
   private String dbName;
@@ -27,8 +27,12 @@ public class Mysql implements IDataAccessObject {
   // ================= Setup =================
 
   /**
-   * Constructor attempts to create a new database. Dropping existing
-   * if found.
+   * Constructor attempts to create a new database.
+   * Method respects two dbModes:
+   *  Overwrite - Overwrite existing DB if found
+   *  Unique -  Create a new DB with the same timestamp
+   *            in name as the control directory
+   *
    * @param propertyCache So we can get the connection details
    */
   public Mysql(PropertyCache propertyCache) {
@@ -40,7 +44,22 @@ public class Mysql implements IDataAccessObject {
       propertyCache.getProperty("dbHost") +
       ":" + propertyCache.getProperty("dbPort");
 
+    String dbMode = propertyCache.getProperty("dbMode");
+    String dbName;
+    switch (dbMode.toUpperCase()) {
+      case "OVERWRITE":
+        dbName = propertyCache.getProperty("dbName");
+        break;
+      case "UNIQUE":
+        dbName = propertyCache.getProperty("dbName") +
+            propertyCache.getProperty("epoch");
+        break;
+      default:
+        throw new RuntimeException("No recognised dbMode in properties file");
+    }
+
     // Drop and recreate the runtime DB
+    propertyCache.setProperty("dbName", dbName);
     dropDatabase();
     createDatabase();
 
