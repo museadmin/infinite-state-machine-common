@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 public class PropertyCache {
 
-  private Properties prop = new Properties();
+  private final Properties prop = new Properties();
   private static final Logger LOGGER = LoggerFactory.getLogger(PropertyCache.class.getName());
 
   /**

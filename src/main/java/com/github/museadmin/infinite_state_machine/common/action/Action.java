@@ -19,7 +19,7 @@ public abstract class Action implements IAction {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(Action.class.getName());
 
-  private String actionName = getClass().getSimpleName();
+  private final String actionName = getClass().getSimpleName();
   public DataAccessLayer dataAccessLayer;
   public String runRoot;
 

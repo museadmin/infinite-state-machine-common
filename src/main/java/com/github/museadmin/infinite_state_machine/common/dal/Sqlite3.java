@@ -17,9 +17,9 @@ import java.util.Arrays;
  */
 public class Sqlite3 implements IDataAccessObject {
 
-  private String database;
-  public String SQLITE_TRUE = "1";
-  public String SQLITE_FALSE = "0";
+  private final String database;
+  public final String SQLITE_TRUE = "1";
+  public final String SQLITE_FALSE = "0";
 
   // ================= Setup =================
 
@@ -139,7 +139,8 @@ public class Sqlite3 implements IDataAccessObject {
       JSONObject col = (JSONObject) column;
 
       sbSql.append(col.getString("name"));
-      sbSql.append(" " + col.getString("type"));
+      sbSql.append(" ");
+      sbSql.append(col.getString("type"));
 
       if (col.getBoolean("not_null")) {
         sbSql.append(" NOT NULL");
@@ -170,7 +171,8 @@ public class Sqlite3 implements IDataAccessObject {
 
       String comment = col.getString("comment");
       if (! comment.isEmpty()) {
-        sbSql.append("-- " + comment);
+        sbSql.append("-- ");
+        sbSql.append(comment);
       }
 
       sbSql.append(" \n");

@@ -18,11 +18,11 @@ import java.util.Arrays;
  */
 public class Mysql { //implements IDataAccessObject {
 
-  private PropertyCache propertyCache;
+  private final PropertyCache propertyCache;
   private String dbName;
   private String connectionUrl;
-  public String MYSQL_TRUE = "1";
-  public String MYSQL_FALSE = "0";
+  public final String MYSQL_TRUE = "1";
+  public final String MYSQL_FALSE = "0";
 
   // ================= Setup =================
 
