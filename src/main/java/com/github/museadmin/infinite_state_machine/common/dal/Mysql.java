@@ -16,7 +16,7 @@ import java.util.Arrays;
 /**
  * Data Access Object for when using Mysql
  */
-public class Mysql { //implements IDataAccessObject {
+public class Mysql implements IDataAccessObject {
 
   private final PropertyCache propertyCache;
   private String dbName;
@@ -166,74 +166,8 @@ public class Mysql { //implements IDataAccessObject {
    * Create a database table using a JSON definition
    * @param table JSONObject
    */
-  public void createTable(JSONObject table) {
-    executeSqlStatement(createTableStatement(table));
-  }
-
-  /**
-   * SQLite3 context aware CREATE TABLE statement builder
-   * @param table JSONObject created from JSON defintion file
-   * @return String Create table statement
-   */
-  private String createTableStatement(JSONObject table) {
-
-    StringBuilder sbSql = new StringBuilder(200);
-    sbSql.append("CREATE TABLE ");
-    sbSql.append(table.get("name"));
-    sbSql.append(" (\n");
-
-    JSONArray columns = table.getJSONArray("columns");
-
-    columns.forEach(column -> {
-      JSONObject col = (JSONObject) column;
-
-      sbSql.append(col.getString("name"));
-
-      // TODO TEXT changes to VARCHAR
-      sbSql.append(" " + col.getString("type"));
-
-      if (col.getBoolean("not_null")) {
-        sbSql.append(" NOT NULL");
-      }
-
-      JSONObject def = col.getJSONObject("default");
-      switch (def.getString("type")) {
-        case "string" :
-          if (! def.getString("value").isEmpty()) {
-            sbSql.append(String.format(" DEFAULT '%s'", def.getString("value")));
-          }
-          break;
-        case "function" :
-          if (! def.getString("value").isEmpty()) {
-            sbSql.append(String.format(" DEFAULT %s", def.getString("value")));
-          }
-          break;
-        default :
-          throw new InvalidDefaultTypeException(
-            String.format("Invalid default type for field (%s)", def.getString("type")));
-      }
-
-      if (col.getBoolean("primary_key")) {
-        sbSql.append(" PRIMARY KEY");
-      }
-
-      sbSql.append(", ");
-
-      String comment = col.getString("comment");
-      if (! comment.isEmpty()) {
-        sbSql.append("-- " + comment);
-      }
-
-      sbSql.append(" \n");
-    });
-
-    sbSql.append(");");
-
-    String sql = sbSql.toString();
-    int index = sql.lastIndexOf(',');
-    sbSql.deleteCharAt(index);
-
-    return sbSql.toString();
+  public void createTable(String table) {
+    executeSqlStatement(table);
   }
 
   // ================= Action =================

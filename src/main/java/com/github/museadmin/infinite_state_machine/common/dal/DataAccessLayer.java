@@ -33,10 +33,9 @@ public class DataAccessLayer implements IDataAccessObject {
         String dbFile = dbPath + File.separator + propertyCache.getProperty("dbName");
         iDataAccessObject = new Sqlite3(dbFile);
         break;
-        // TODO reinstate when doing MySql layer
-//      case "MYSQL":
-//        iDataAccessObject = new Mysql(propertyCache);
-//        break;
+      case "MYSQL":
+        iDataAccessObject = new Mysql(propertyCache);
+        break;
       default:
         throw new RuntimeException("Failed to identify RDBMS in use from property file");
     }
