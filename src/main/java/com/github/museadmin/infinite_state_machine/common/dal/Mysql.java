@@ -1,7 +1,6 @@
 package com.github.museadmin.infinite_state_machine.common.dal;
 
 import com.github.museadmin.infinite_state_machine.common.lib.PropertyCache;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.sql.Connection;
@@ -12,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * Data Access Object for when using Mysql
@@ -19,7 +19,6 @@ import java.util.Arrays;
 public class Mysql implements IDataAccessObject {
 
   private final PropertyCache propertyCache;
-  private String dbName;
   private String connectionUrl;
   public final String MYSQL_TRUE = "1";
   public final String MYSQL_FALSE = "0";
@@ -75,21 +74,41 @@ public class Mysql implements IDataAccessObject {
    * Drop the runtime database if it already exists
    */
   public void dropDatabase() {
-    executeSqlStatement(
-      String.format("DROP DATABASE IF EXISTS %s;", propertyCache.getProperty("dbName"))
+    String sql = String.format(
+        "DROP DATABASE IF EXISTS %s;",
+        propertyCache.getProperty("dbName")
     );
+    executeSqlStatementOnServer(sql);
   }
 
   /**
    * Create a unique database instance for the run
    */
   public void createDatabase() {
-    executeSqlStatement(
-      String.format("CREATE DATABASE IF NOT EXISTS %s;", propertyCache.getProperty("dbName"))
+    String sql = String.format(
+        "CREATE DATABASE IF NOT EXISTS %s;",
+        propertyCache.getProperty("dbName")
     );
+    executeSqlStatementOnServer(sql);
   }
 
   // ================= DB =================
+
+  /**
+   * Execute a SQL statement on the server, not on a specific DB
+   */
+  public void executeSqlStatementOnServer(String sql){
+    try {
+      Connection connection = getConnectionToServer();
+      Statement statement = connection.createStatement();
+      statement.execute(sql);
+      connection.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      System.exit(1);
+    }
+  }
 
   /**
    * Execute a SQL query and return the results in an array list
@@ -101,7 +120,7 @@ public class Mysql implements IDataAccessObject {
     ArrayList<JSONObject> rows = new ArrayList<>();
 
     try {
-      Connection connection = getConnection();
+      Connection connection = getConnectionToDatabase();
       Statement statement = connection.createStatement();
       ResultSet rs = statement.executeQuery(sql);
       ResultSetMetaData rsm = rs.getMetaData();
@@ -132,7 +151,7 @@ public class Mysql implements IDataAccessObject {
   public Boolean executeSqlStatement(String sql)  {
     Boolean rc = false;
     try {
-      Connection connection = getConnection();
+      Connection connection = getConnectionToDatabase();
       Statement statement = connection.createStatement();
       rc = statement.execute(sql);
       connection.close();
@@ -148,12 +167,59 @@ public class Mysql implements IDataAccessObject {
    * Return a connection to the Mysql database
    * @return Connection
    */
-  private Connection getConnection(){
+  private Connection getConnectionToDatabase(){
+
+    String url = String.format(
+        "jdbc:mysql://%s:%s/%s",
+        propertyCache.getProperty("dbHost"),
+        propertyCache.getProperty("dbPort"),
+        propertyCache.getProperty("dbName")
+    );
+
+    Properties objProperties = new Properties();
+    objProperties.put("user", propertyCache.getProperty("dbUser"));
+    objProperties.put("password", propertyCache.getProperty("dbPassword"));
+    objProperties.put("useUnicode", "true");
+    objProperties.put("characterEncoding", "utf-8");
+    objProperties.put("useSSL", propertyCache.getProperty("useSSL"));
+
     try {
-      return DriverManager.getConnection(
-        connectionUrl,
-        propertyCache.getProperty("dbUser"),
-        propertyCache.getProperty("dbPassword"));
+      Connection con = DriverManager.getConnection(url, objProperties);
+      return con;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      System.exit(1);
+    }
+    return null;
+  }
+
+  /**
+   * Return a connection to the Mysql server. This only differs
+   * by one line from getConnectionToDatabase but
+   * will keep it as two distinct methods for now as we might
+   * need to extend the options for them individually as well as the URL.
+   *
+   * @return Connection
+   */
+  private Connection getConnectionToServer(){
+
+    String url = String.format(
+        "jdbc:mysql://%s:%s/",
+        propertyCache.getProperty("dbHost"),
+        propertyCache.getProperty("dbPort")
+    );
+
+    Properties objProperties = new Properties();
+    objProperties.put("user", propertyCache.getProperty("dbUser"));
+    objProperties.put("password", propertyCache.getProperty("dbPassword"));
+    objProperties.put("useUnicode", "true");
+    objProperties.put("characterEncoding", "utf-8");
+    objProperties.put("useSSL", propertyCache.getProperty("useSSL"));
+
+    try {
+      Connection con = DriverManager.getConnection(url, objProperties);
+      return con;
     } catch (SQLException e) {
       e.printStackTrace();
       System.err.println(e.getClass().getName() + ": " + e.getMessage());
