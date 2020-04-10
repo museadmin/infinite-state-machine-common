@@ -78,7 +78,7 @@ public class Mysql implements IDataAccessObject {
         "DROP DATABASE IF EXISTS %s;",
         propertyCache.getProperty("dbName")
     );
-    executeSqlStatementOnServer(sql);
+    executeSqlStatementOnSchema(sql);
   }
 
   /**
@@ -89,38 +89,28 @@ public class Mysql implements IDataAccessObject {
         "CREATE DATABASE IF NOT EXISTS %s;",
         propertyCache.getProperty("dbName")
     );
-    executeSqlStatementOnServer(sql);
+    executeSqlStatementOnSchema(sql);
   }
 
   // ================= DB =================
 
   /**
-   * Execute a SQL statement on the server, not on a specific DB
-   */
-  public void executeSqlStatementOnServer(String sql){
-    try {
-      Connection connection = getConnectionToServer();
-      Statement statement = connection.createStatement();
-      statement.execute(sql);
-      connection.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
-      System.err.println(e.getClass().getName() + ": " + e.getMessage());
-      System.exit(1);
-    }
-  }
-
-  /**
-   * Execute a SQL query and return the results in an array list
+   * Execute a SQL query on the RDBMS server and return the results
+   * in an array list. This is for querying the schema, rather than
+   * the control DB.
+   *
+   * Not used by the ISM or core action pack, but provided for 3rd
+   * party use.
+   *
    * @param sql The query
    * @return ArrayList holds the records returned
    */
-  public ArrayList<JSONObject> executeSqlQuery(String sql) {
+  public ArrayList<JSONObject> executeSqlQueryOnSchema(String sql) {
 
     ArrayList<JSONObject> rows = new ArrayList<>();
+    Connection connection = getConnectionToServer();
 
     try {
-      Connection connection = getConnectionToDatabase();
       Statement statement = connection.createStatement();
       ResultSet rs = statement.executeQuery(sql);
       ResultSetMetaData rsm = rs.getMetaData();
@@ -134,11 +124,75 @@ public class Mysql implements IDataAccessObject {
         }
         rows.add(row);
       }
-      connection.close();
     } catch (SQLException e) {
       e.printStackTrace();
-      System.err.println(e.getClass().getName() + ": " + e.getMessage());
       System.exit(1);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+    return rows;
+  }
+
+  /**
+   * Execute a SQL statement on the server, not on a specific DB.
+   * For schema commands like create database etc.
+   *
+   * @param sql SQL String
+   */
+  public void executeSqlStatementOnSchema(String sql){
+    Connection connection = getConnectionToServer();
+    try {
+      Statement statement = connection.createStatement();
+      statement.execute(sql);
+    } catch (SQLException e) {
+      e.printStackTrace();
+      System.exit(1);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  /**
+   * Execute a SQL query and return the results in an array list
+   * @param sql The query
+   * @return ArrayList holds the records returned
+   */
+  public ArrayList<JSONObject> executeSqlQuery(String sql) {
+
+    ArrayList<JSONObject> rows = new ArrayList<>();
+    Connection connection = getConnectionToDatabase();
+
+    try {
+      Statement statement = connection.createStatement();
+      ResultSet rs = statement.executeQuery(sql);
+      ResultSetMetaData rsm = rs.getMetaData();
+      int columnCount = rsm.getColumnCount();
+
+      while (rs.next()) {
+        int i = 1;
+        JSONObject row = new JSONObject();
+        while(i <= columnCount) {
+          row.put(rsm.getColumnName(i), rs.getString(i++));
+        }
+        rows.add(row);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      System.exit(1);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
     return rows;
   }
@@ -150,15 +204,19 @@ public class Mysql implements IDataAccessObject {
    */
   public Boolean executeSqlStatement(String sql)  {
     Boolean rc = false;
+    Connection connection = getConnectionToDatabase();
     try {
-      Connection connection = getConnectionToDatabase();
       Statement statement = connection.createStatement();
       rc = statement.execute(sql);
-      connection.close();
     } catch (SQLException e) {
       e.printStackTrace();
-      System.err.println(e.getClass().getName() + ": " + e.getMessage());
       System.exit(1);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
     return rc;
   }
@@ -182,6 +240,7 @@ public class Mysql implements IDataAccessObject {
     objProperties.put("useUnicode", "true");
     objProperties.put("characterEncoding", "utf-8");
     objProperties.put("useSSL", propertyCache.getProperty("useSSL"));
+    objProperties.put("allowPublicKeyRetrieval", propertyCache.getProperty("allowPublicKeyRetrieval"));
 
     try {
       Connection con = DriverManager.getConnection(url, objProperties);
@@ -216,6 +275,7 @@ public class Mysql implements IDataAccessObject {
     objProperties.put("useUnicode", "true");
     objProperties.put("characterEncoding", "utf-8");
     objProperties.put("useSSL", propertyCache.getProperty("useSSL"));
+    objProperties.put("allowPublicKeyRetrieval", propertyCache.getProperty("allowPublicKeyRetrieval"));
 
     try {
       Connection con = DriverManager.getConnection(url, objProperties);

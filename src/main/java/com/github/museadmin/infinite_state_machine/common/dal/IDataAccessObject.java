@@ -16,6 +16,7 @@ public interface IDataAccessObject {
   void createTable(String table);
   Boolean executeSqlStatement(String sql);
   ArrayList<JSONObject> executeSqlQuery(String sql);
+  void dropDatabase();
 
   // ================= Hooks =================
   Boolean beforeActionsComplete();

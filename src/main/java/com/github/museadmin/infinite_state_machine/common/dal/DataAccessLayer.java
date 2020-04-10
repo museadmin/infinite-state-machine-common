@@ -69,6 +69,10 @@ public class DataAccessLayer implements IDataAccessObject {
     iDataAccessObject.createTable(table);
   }
 
+  public void dropDatabase() {
+    iDataAccessObject.dropDatabase();
+  }
+
   // ================= Action =================
 
   /**

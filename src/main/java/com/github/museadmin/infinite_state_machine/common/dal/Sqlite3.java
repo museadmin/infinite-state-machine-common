@@ -40,6 +40,13 @@ public class Sqlite3 implements IDataAccessObject {
     getConnection(database);
   }
 
+  /**
+   * Not required for SQLITE3 but included for interface as is
+   * required by MySql etc.
+   */
+  public void dropDatabase() {
+  }
+
   // ================= DB =================
 
   /**
