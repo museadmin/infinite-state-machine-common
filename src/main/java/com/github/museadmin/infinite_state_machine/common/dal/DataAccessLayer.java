@@ -13,6 +13,8 @@ import java.util.ArrayList;
 public class DataAccessLayer implements IDataAccessObject {
 
   IDataAccessObject iDataAccessObject;
+  public final String SQL_TRUE = "1";
+  public final String SQL_FALSE = "0";
 
   /**
    * Create the control database for the state machine
@@ -207,29 +209,5 @@ public class DataAccessLayer implements IDataAccessObject {
     iDataAccessObject.unsetState(stateName);
   }
 
-  // ================= Message  =================
-  /**
-   * Insert a message into the database. Assumes valid json object.
-   * @param message JSONObject the message
-   */
-  public void insertMessage(JSONObject message) {
-    iDataAccessObject.insertMessage(message);
-  }
-
-  /**
-   * Retrieve an array of unprocessed messages form the database messages table
-   * @return ArrayList of messages as JSONObjects
-   */
-  public ArrayList<JSONObject> getUnprocessedMessages() {
-    return iDataAccessObject.getUnprocessedMessages();
-  }
-
-  /**
-   * Set the processed field true of a message record
-   * @param id The ID (PK) of the record
-   */
-  public void markMessageProcessed(Integer id) {
-    iDataAccessObject.markMessageProcessed(id);
-  }
 }
 

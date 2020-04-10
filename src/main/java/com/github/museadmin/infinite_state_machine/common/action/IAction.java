@@ -18,10 +18,7 @@ public interface IAction {
   void deactivate();
   void deactivate(String actionFlag);
   JSONObject getJsonObjectFromFile(String fileName);
-  ArrayList<JSONObject> getUnprocessedMessages();
-  void insertMessage(JSONObject message);
   void insertProperty(String property, String value);
-  void markMessageProcessed(Integer id);
   void setDataAccessLayer(DataAccessLayer dataAccessLayer);
   void setRunRoot(String runRoot);
   String queryProperty(String property);

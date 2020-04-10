@@ -35,10 +35,5 @@ public interface IDataAccessObject {
   void setState(String stateName);
   void unsetState(String stateName);
 
-  // ================= Message  =================
-  void insertMessage(JSONObject message);
-  ArrayList<JSONObject> getUnprocessedMessages();
-  void markMessageProcessed(Integer id);
-
 }
 

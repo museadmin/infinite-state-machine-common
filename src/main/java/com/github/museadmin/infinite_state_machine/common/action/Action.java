@@ -191,24 +191,6 @@ public abstract class Action implements IAction {
     dataAccessLayer.unsetState(stateName);
   }
 
-  // ================= messaging =================
-
-  /**
-   * Insert a message into the database. Assumes valid json object.
-   * @param message JSONObject the message
-   */
-  public void insertMessage(JSONObject message) {
-    dataAccessLayer.insertMessage(message);
-  }
-
-  /**
-   * Retrieve an array of unprocessed messages form the database messages table
-   * @return ArrayList of messages as JSONObjects
-   */
-  public ArrayList<JSONObject> getUnprocessedMessages() {
-    return dataAccessLayer.getUnprocessedMessages();
-  }
-
   // ================= File =================
 
   /**
@@ -254,11 +236,4 @@ public abstract class Action implements IAction {
     return new JSONObject(result);
   }
 
-  /**
-   * Set the processed field true of a message record
-   * @param id The ID (PK) of the record
-   */
-  public void markMessageProcessed(Integer id) {
-    dataAccessLayer.markMessageProcessed(id);
-  }
 }
